@@ -3,8 +3,13 @@ package com.yychatclient.view;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 import javax.swing.*;
+
+import com.yychat.model.Message;
+import com.yychatclient.controller.ClientConnect;
 
 public class FriendChat extends JFrame implements ActionListener{
 	JTextArea jta;
@@ -14,8 +19,12 @@ public class FriendChat extends JFrame implements ActionListener{
 	JTextField jtf;
 	JButton jb;
 	
-	
+	String sender;
+	String receiver;
 	public FriendChat(String sender,String receiver) {
+		this.sender=sender;
+		this.receiver=receiver;
+		
 		jta=new JTextArea();
 		jta.setEditable(false);
 		jta.setForeground(Color.red);
@@ -46,10 +55,25 @@ public class FriendChat extends JFrame implements ActionListener{
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource()==jb) jta.append(jtf.getText()+"\r\n");
+		if(e.getSource()==jb) {
+			jta.append(jtf.getText()+"\r\n");
 		
+			Message mess=new Message();
+			mess.setSender(sender);
+			mess.setReceiver(receiver);
+			mess.setContent(jtf.getText());
+			mess.setMessageType(Message.message_Common);
+			ObjectOutputStream oos;
+			try {
+				oos = new ObjectOutputStream(ClientConnect.s.getOutputStream());
+				oos.writeObject(mess);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+		}
+	
 	}
-	
-	
 
 }
