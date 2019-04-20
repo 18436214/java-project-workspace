@@ -5,10 +5,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.net.Socket;
+import java.util.HashMap;
 
 import javax.swing.*;
 
 public class FriendList  extends JFrame implements ActionListener,MouseListener{
+	public static HashMap hmFriendChat1=new HashMap<String,FriendChat1>();
+	
 	CardLayout cardLayout;
 	
 	
@@ -58,9 +62,16 @@ public class FriendList  extends JFrame implements ActionListener,MouseListener{
 		myFriendListJPanel=new JPanel(new GridLayout(FRIENDCOUNT-1,1));
 		for(int i=1;i<FRIENDCOUNT;i++) {
 			myFriendJLabel[i]=new JLabel(i+"",new ImageIcon("images/YY1.gif"),JLabel.LEFT);
+			myFriendJLabel[i].setEnabled(false);
+			
+			//if(Integer.parseInt(userName)==i) myFriendJLabel[i].setEnabled(true);
+			
 			myFriendJLabel[i].addMouseListener(this);
 			myFriendListJPanel.add(myFriendJLabel[i]);
 		}
+		
+		myFriendJLabel[Integer.parseInt(userName)].setEnabled(true);
+		
 		myFriendJScrollPane=new JScrollPane(myFriendListJPanel);
 		myFriendPanel.add(myFriendJScrollPane);
 		
@@ -139,6 +150,14 @@ public class FriendList  extends JFrame implements ActionListener,MouseListener{
 		
 
 	}
+	public void setEnableFriendIcon(String friendString) {
+		String[] friendName=friendString.split(" ");
+		int count=friendName.length;
+		for(int i=0;i<count;i++) {
+			myFriendJLabel[Integer.parseInt(friendName[i])].setEnabled(true);
+		}
+		
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
@@ -157,7 +176,18 @@ public class FriendList  extends JFrame implements ActionListener,MouseListener{
 		if(e.getClickCount()==2) {
 			JLabel jlbl=(JLabel)e.getSource();
 			String receiver=jlbl.getText();
-			new FriendChat(this.userName,receiver);}
+			//new FriendChat(this.userName,receiver);
+			//new Thread(new FriendChat(this.userName,receiver)).start();
+			
+			FriendChat1 friendChat1=(FriendChat1)hmFriendChat1.get(userName+"to"+receiver);
+			if(friendChat1==null) {
+				friendChat1=new FriendChat1(this.userName,receiver);
+				hmFriendChat1.put(userName+"to"+receiver,friendChat1 );
+			}else {
+				friendChat1.setVisible(true);
+			}
+			
+		}
 	}
 
 	@Override

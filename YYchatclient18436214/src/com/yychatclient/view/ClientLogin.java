@@ -4,6 +4,10 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.HashMap;
 
 import javax.swing.*;
 
@@ -12,7 +16,8 @@ import com.yychat.model.User;
 import com.yychatclient.controller.ClientConnect;
 
 public class ClientLogin extends JFrame implements ActionListener{
-
+	public static HashMap hmFriendList=new HashMap<String,FriendList>();
+	
 	JLabel jlbl1;
 	
 	JTabbedPane jtp1;
@@ -75,9 +80,25 @@ public class ClientLogin extends JFrame implements ActionListener{
 			user.setUserName(userName);
 			user.setPassWord(passWord);
 			
-			Message mess=new ClientConnect().loginValidate(user);
-			if(mess.getMessageType().equals(Message.message_LoginSuccess)) {
-				new FriendList(userName);
+			boolean loginSuccess=new ClientConnect().loginValidate(user);
+			if(loginSuccess) {
+				FriendList friendList=new FriendList(userName);
+				hmFriendList.put(userName, friendList);
+				
+				Message mess=new Message();
+				mess.setSender(userName);
+				mess.setReceiver("Server");
+				mess.setMessageType(Message.message_RequestOnlineFriend);
+				
+				Socket s=(Socket)ClientConnect.hmSocket.get(userName);
+				ObjectOutputStream oos;
+				try {
+					oos=new ObjectOutputStream(s.getOutputStream());
+					oos.writeObject(mess);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
 				this.dispose();
 			}else {
 				JOptionPane.showMessageDialog(this,"√‹¬Î¥ÌŒÛ");
